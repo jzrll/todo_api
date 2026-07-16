@@ -13,15 +13,15 @@ tasks = [
 async def read_root():
     return { "name": "Task API", "version": "1.0", "endpoints": ["/tasks"] }
 
-@app.get("/health")
+@app.get("/health", description="Check the health of the API")
 async def read_health():
     return {"status": "healthy"}
 
-@app.get("/tasks")
+@app.get("/tasks", description="Read all tasks")
 async def read_tasks():
     return tasks
 
-@app.get("/tasks/{task_id}")
+@app.get("/tasks/{task_id}", description="Read a task by ID")
 async def read_task(task_id: int):
     for task in tasks:
         if task["id"] == task_id:
@@ -31,7 +31,7 @@ async def read_task(task_id: int):
             content={"error": f"Task {task_id} not found"}
         )
 
-@app.post("/tasks")
+@app.post("/tasks", description="Create a new task")
 async def create_task(task: dict):
     if task.get("title") == "" or task.get("title") is None:
         return JSONResponse(
@@ -49,7 +49,7 @@ async def create_task(task: dict):
         content= {"message": "Created"}
     )
 
-@app.put("/tasks/{task_id}")
+@app.put("/tasks/{task_id}", description="Update a task by ID")
 async def update_task(task_id: int, task: dict):
     for t in tasks:
         if t["id"] == task_id:
@@ -64,7 +64,7 @@ async def update_task(task_id: int, task: dict):
         content={"error": f"Task {task_id} not found"}
     )
 
-@app.delete("/tasks/{task_id}")
+@app.delete("/tasks/{task_id}", description="Delete a task by ID")
 async def delete_task(task_id: int):
     for t in tasks:
         if t["id"] == task_id:
