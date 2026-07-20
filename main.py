@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+from database import setup_db
 
 app = FastAPI()
+
+setup_db()
 
 tasks = [
     {"id": 1, "title": "Task 1", "done": False},
