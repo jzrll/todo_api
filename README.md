@@ -51,3 +51,12 @@ content-type: application/json
 ## Swagger UI
 
 ![Swagger UI screenshot](swagger.png)
+
+
+## SQLite Database
+
+SQLite was chosen as the database for this project because it is lightweight, requires zero additional setup, and stores the entire database in a single file. It is suitable for this project because it allows task data to be stored even after the server is restarted without requiring a separate database server.
+
+The SQLite database file is created automatically when the application starts.
+
+
