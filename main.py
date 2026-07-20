@@ -63,31 +63,68 @@ async def create_task(task: dict):
     )
 
 @app.put("/tasks/{task_id}", description="Update a task by ID")
-async def update_task(task_id: int, task: dict):
-    for t in tasks:
-        if t["id"] == task_id:
-            t["title"] = task.get("title", t["title"])
-            t["done"] = task.get("done", t["done"])
-            return JSONResponse(
-                status_code=200,
-                content={"message": "Updated"}
-            )
+def update_task(task_id: int, task: dict):
+    con = sqlite3.connect("tasks.db")
+    cur = con.cursor()
+
+    existing_task = cur.execute(
+        "SELECT * FROM tasks WHERE id = ?",
+        (task_id,)
+    ).fetchone()
+
+    if existing_task is None:
+        con.close()
+        return JSONResponse(
+            status_code=404,
+            content={"error": f"Task {task_id} not found"}
+        )
+
+    title = task.get("title", existing_task[1])
+    done = task.get("done", existing_task[2])
+
+    cur.execute(
+        """
+        UPDATE tasks
+        SET title = ?, done = ?
+        WHERE id = ?
+        """,
+        (title, done, task_id)
+    )
+
+    con.commit()
+    con.close()
+
     return JSONResponse(
-        status_code=404,
-        content={"error": f"Task {task_id} not found"}
+        status_code=200,
+        content={"message": "Updated"}
     )
 
 @app.delete("/tasks/{task_id}", description="Delete a task by ID")
-async def delete_task(task_id: int):
-    for t in tasks:
-        if t["id"] == task_id:
-            tasks.remove(t)
-            return JSONResponse(
-                status_code=200,
-                content={"message": "Deleted"}
-            )
-    return JSONResponse(
-        status_code=404,
-        content={"error": f"Task {task_id} not found"}
+def delete_task(task_id: int):
+    con = sqlite3.connect("tasks.db")
+    cur = con.cursor()
+
+    existing_task = cur.execute(
+        "SELECT * FROM tasks WHERE id = ?",
+        (task_id,)
+    ).fetchone()
+
+    if existing_task is None:
+        con.close()
+        return JSONResponse(
+            status_code=404,
+            content={"error": f"Task {task_id} not found"}
+        )
+
+    cur.execute(
+        "DELETE FROM tasks WHERE id = ?",
+        (task_id,)
     )
 
+    con.commit()
+    con.close()
+
+    return JSONResponse(
+        status_code=200,
+        content={"message": "Deleted"}
+    )
