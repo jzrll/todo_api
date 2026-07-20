@@ -1,16 +1,12 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from database import setup_db
+import sqlite3
 
 app = FastAPI()
 
 setup_db()
 
-tasks = [
-    {"id": 1, "title": "Task 1", "done": False},
-    {"id": 2, "title": "Task 2", "done": False},
-    {"id": 3, "title": "Task 3", "done": False},
-]
 
 @app.get("/")
 async def read_root():
@@ -22,13 +18,18 @@ async def read_health():
 
 @app.get("/tasks", description="Read all tasks")
 async def read_tasks():
+    con = sqlite3.connect("tasks.db")
+    cur = con.cursor()
+    tasks = cur.execute("select * from tasks").fetchall()
     return tasks
 
 @app.get("/tasks/{task_id}", description="Read a task by ID")
 async def read_task(task_id: int):
-    for task in tasks:
-        if task["id"] == task_id:
-            return task
+    con = sqlite3.connect("tasks.db")
+    cur = con.cursor()
+    task = cur.execute(f"select * from tasks WHERE id={task_id}").fetchone()
+    if task:
+        return task
     return JSONResponse(
             status_code=404,
             content={"error": f"Task {task_id} not found"}
