@@ -43,11 +43,20 @@ async def create_task(task: dict):
             content={"error": "Task title is required"}
         )
     new_task = {
-        "id": max([task["id"] for task in tasks], default=0) + 1,
         "title": task.get("title"),
         "done": False
     }
-    tasks.append(new_task)
+    con = sqlite3.connect("tasks.db")
+    cur = con.cursor()
+
+    cur.execute(
+        "INSERT INTO tasks (title, done) VALUES (?, ?)",
+        (task.get("title"), False)
+    )
+
+    con.commit()
+    con.close()
+
     return JSONResponse(
         status_code=201,
         content= {"message": "Created"}
